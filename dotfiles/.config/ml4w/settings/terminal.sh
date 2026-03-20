@@ -1,1 +1,1 @@
-kitty
+/usr/bin/alacritty

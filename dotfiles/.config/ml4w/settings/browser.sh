@@ -1,1 +1,1 @@
-firefox
+/usr/bin/brave
