@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
 # --------------------------------------------------------------
 # Oh My Posh
 # --------------------------------------------------------------
@@ -16,41 +14,28 @@ rm $HOME/.local/share/ml4w-dotfiles-settings/quickshell/shared/Theme.qml
 ln -sf $HOME/.config/quickshell/shared/Theme.qml $HOME/.local/share/ml4w-dotfiles-settings/quickshell/shared/Theme.qml
 
 # --------------------------------------------------------------
-# Temporary Installation of waypaper-git
+# Cargo
 # --------------------------------------------------------------
 
-yay --noconfirm -Rns waypaper
-yay --noconfirm -S waypaper-git
-
-# --------------------------------------------------------------
-# Prebuilt Packages
-# --------------------------------------------------------------
-
-source $SCRIPT_DIR/_prebuilt.sh
+cargo install cargo-update
 
 # --------------------------------------------------------------
 # Cursors
 # --------------------------------------------------------------
 
-source $SCRIPT_DIR/_cursors.sh
+source $repo_path/setup/_cursors.sh
 
 # --------------------------------------------------------------
 # Fonts
 # --------------------------------------------------------------
 
-source $SCRIPT_DIR/_fonts.sh
+source $repo_path/setup/_fonts.sh
 
 # --------------------------------------------------------------
 # Icons
 # --------------------------------------------------------------
 
-source $SCRIPT_DIR/_icons.sh
-
-# --------------------------------------------------------------
-# Migrate
-# --------------------------------------------------------------
-
-source $SCRIPT_DIR/migrate.sh
+source $repo_path/setup/_icons.sh
 
 # --------------------------------------------------------------
 # Create XDG Directories

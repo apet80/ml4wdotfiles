@@ -186,7 +186,7 @@ PanelWindow {
             border.color: theme ? theme.primary : "#89b4fa"
             border.width: 2
             radius: 10
-            opacity: 0.9 // Only the background is transparent
+            opacity: 0.95 // Only the background is transparent
         }
 
         ColumnLayout {
@@ -210,7 +210,7 @@ PanelWindow {
                     iconTxt: "" 
                     onClicked: {
                         root.isOpen = false
-                        Quickshell.execDetached(["hyprpicker"])
+                        Quickshell.execDetached(["bash", "-c", Quickshell.env("HOME") + "/.config/ml4w/settings/hyprpicker.sh"])
                     }
                 }
 
@@ -735,29 +735,7 @@ PanelWindow {
                             iconTxt: ""
                             onClicked: {
                                 root.isOpen = false
-                                Quickshell.execDetached(["waypaper"])
-                            }
-                        }
-                        SettingsWheel {
-                            onClicked: wallpaperMenu.open()
-                            Menu {
-                                id: wallpaperMenu
-                                y: parent.height
-                                
-                                implicitWidth: 220
-                                padding: 8
-                                
-                                background: Rectangle { color: theme.background; border.color: theme.primary; border.width: 1; radius: 8 }
-                                ML4WMenuItem { text: "Random Wallpaper"; onClicked: {
-                                        root.isOpen = false
-                                        Quickshell.execDetached(["bash", "-c", Quickshell.env("HOME") + "/.config/hypr/scripts/waypaper.sh --random"])
-                                    } 
-                                }
-                                ML4WMenuItem { text: "Wallpaper Effects"; onClicked: {
-                                        root.isOpen = false
-                                        Quickshell.execDetached(["bash", "-c", Quickshell.env("HOME") + "/.config/hypr/scripts/wallpaper-effects.sh"])
-                                    } 
-                                }
+                                Quickshell.execDetached(["bash", "-c", Quickshell.env("HOME") + "/.config/ml4w/scripts/ml4w-wallpaper-app"])
                             }
                         }
                     }
