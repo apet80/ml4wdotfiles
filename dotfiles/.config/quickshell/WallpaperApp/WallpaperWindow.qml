@@ -7,7 +7,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Qt.labs.folderlistmodel
 import Qt5Compat.GraphicalEffects
-import qs.shared
+import qs.CustomTheme
 
 PanelWindow {
     id: root
@@ -75,20 +75,29 @@ PanelWindow {
         function close(): void { root.isOpen = false } 
     }
 
-    Theme { id: theme }
-
     // Default fallback folder just in case the file doesn't exist
     property string wallpaperFolder: "file://" + Quickshell.env("HOME") + "/.config/ml4w/wallpapers"
 
-    // This runs automatically when Quickshell starts
     Process {
-        command: ["bash", "-c", "cat", Quickshell.env("HOME") + "/.config/ml4w/settings/wallpaper-folder"]
+        id: folderLoader
+        // Call cat directly and pass the path as the second array item
+        command: ["cat", Quickshell.env("HOME") + "/.config/ml4w/settings/wallpaper-folder"]
         running: true
         
         stdout: StdioCollector {
             onStreamFinished: {
-                console.log(this.text.trim())
-                root.wallpaperFolder = this.text.trim()
+                let rawPath = this.text.trim();
+                
+                if (rawPath !== "") {
+                    rawPath = rawPath.replace("$HOME", Quickshell.env("HOME"));
+                    rawPath = rawPath.replace("~", Quickshell.env("HOME"));
+                    // Ensure the path starts with file:// for the FolderListModel
+                    let newPath = rawPath.startsWith("file://") ? rawPath : "file://" + rawPath;
+                    if (root.wallpaperFolder === newPath) {
+                        root.wallpaperFolder = "";
+                    }
+                    root.wallpaperFolder = newPath;
+                }
             }
         }
     }
@@ -98,18 +107,19 @@ PanelWindow {
         id: control
         contentItem: Text {
             text: control.text
-            font.family: theme.fontFamily
+            font.family: Theme.fontFamily
             font.pixelSize: 14
-            color: control.highlighted ? theme.background : theme.primary 
+            color: control.highlighted ? Theme.background : Theme.primary 
             verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
             implicitWidth: 200
             implicitHeight: 36
-            color: control.highlighted ? theme.primary : "transparent"
+            color: control.highlighted ? Theme.primary : "transparent"
             radius: 4
         }
     }
+
 
     component SettingsWheel: Button {
         implicitWidth: 28  
@@ -118,7 +128,7 @@ PanelWindow {
         font.family: "monospace"
         background: Rectangle { color: "transparent" }
         contentItem: Text { 
-            text: parent.text; color: theme.primary; font.pixelSize: 18; 
+            text: parent.text; color: Theme.primary; font.pixelSize: 18; 
             verticalAlignment: Text.AlignVCenter; horizontalAlignment: Text.AlignHCenter
         }
     }
@@ -128,8 +138,8 @@ PanelWindow {
     // ==========================================
     Rectangle {
         anchors.fill: parent
-        color: theme ? theme.background : "#1e1e2e"
-        border.color: theme ? theme.primary : "#89b4fa"
+        color: Theme.background
+        border.color: Theme.primary
         border.width: 2
         radius: 10
         opacity: 0.95
@@ -150,7 +160,7 @@ PanelWindow {
                 TextField {
                     id: searchInput
                     placeholderText: "Search image"
-                    color: theme ? theme.primary : "#89b4fa"
+                    color: Theme.primary
                     font.pixelSize: 14
                     padding:8
                     Layout.fillWidth: true
@@ -160,9 +170,9 @@ PanelWindow {
                     
                     background: Rectangle {
                         anchors.fill: parent
-                        color: theme.background
+                        color: Theme.background
                         radius: 10
-                        border.color: theme.primary
+                        border.color: Theme.primary
                         border.width: 1
                     }
                 }
@@ -179,8 +189,8 @@ PanelWindow {
                         padding: 8
                         
                         background: Rectangle { 
-                            color: theme.background 
-                            border.color: theme.primary 
+                            color: Theme.background 
+                            border.color: Theme.primary 
                             border.width: 1 
                             radius: 8 
                         }
@@ -209,6 +219,13 @@ PanelWindow {
                             } 
                         }
 
+                        ML4WMenuItem { 
+                            text: "Reload Images"
+                            onClicked: {
+                                folderLoader.running = true;
+                            } 
+                        }
+
                     }
                 }
             }
@@ -216,7 +233,7 @@ PanelWindow {
             Rectangle { 
                 Layout.fillWidth: true
                 implicitHeight: 1
-                color: theme ? theme.primary : "#89b4fa"
+                color: Theme.primary
                 opacity: 0.3 
             }
 
@@ -261,14 +278,13 @@ PanelWindow {
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: 8 
-                        color: theme.secondary 
+                        color: Theme.secondary 
                         
-                        border.color: mouseArea.containsMouse ? theme.primary : "transparent"
+                        border.color: mouseArea.containsMouse ? Theme.primary : "transparent"
                         border.width: 2
                         radius: 10
                         clip: true
 
-// --- NEW: The invisible mask shape defining the 10px rounded corners ---
                         Rectangle {
                             id: contentMask
                             anchors.fill: parent
@@ -277,7 +293,6 @@ PanelWindow {
                             visible: false
                         }
 
-                        // --- NEW: Wrapper applying the OpacityMask to the image & label ---
                         Item {
                             anchors.fill: parent
                             anchors.margins: 2
