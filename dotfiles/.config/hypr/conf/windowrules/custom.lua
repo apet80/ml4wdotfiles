@@ -9,6 +9,7 @@ hl.window_rule({
     no_blur     = true,
     no_anim     = true,
     no_shadow   = true,
+    opaque      = true,
     border_size = 0,
     rounding    = 0,
 })
