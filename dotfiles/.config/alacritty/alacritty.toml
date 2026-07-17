@@ -1,0 +1,42 @@
+
+[env]
+TERM = "alacritty"
+
+[window]
+dynamic_padding = false
+dynamic_title   = true
+opacity         = 0.85
+startup_mode    = "Windowed"
+
+[terminal.shell]
+program = "/bin/zsh"
+args = ["-l"]
+
+[window.dimensions]
+columns = 140
+lines   = 35
+
+[scrolling]
+history = 12000
+
+[selection]
+save_to_clipboard = true
+
+[mouse]
+bindings = [
+{ mouse = "Right", action = "Paste" },
+]
+
+[debug]
+highlight_damage   = false
+log_level          = "Warn"
+persistent_logging = false
+print_events       = false
+render_timer       = false
+
+[general]
+# alacritty.toml
+
+live_config_reload = true
+
+[terminal]
