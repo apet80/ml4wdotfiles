@@ -1,12 +1,18 @@
 /*
 Default configuration file for the Quickshell Statusbar.
+
+bar.monitors controls which monitors get a bar:
+  []                  - first monitor only (default)
+  ["all"]              - every connected monitor
+  ["DP-1", "HDMI-A-1"] - an explicit list of monitor names (see `hyprctl monitors`)
 */
 {
     "bar": {
         "height": 40,
         "reservedHeight": 72,
         "enabled": false,
-        "alwaysExpanded": false
+        "alwaysExpanded": false,
+        "monitors": []
     },
     "pill": {
         "collapsedWidth": 0,
