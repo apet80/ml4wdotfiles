@@ -5,14 +5,18 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import qs.CustomTheme
 
-// Shows the number of pending system updates next to a package icon. The count
-// comes from ml4w-check-system-updates (the same script the Waybar module
-// uses), polled every 30 minutes. The module hides itself completely while no
-// updates are available; clicking it launches the ML4W update routine.
+// Shows the number of pending system updates next to a package icon. The
+// count is driven from outside (StatusbarWindow polls
+// ml4w-check-system-updates once, in the shared Scope, and hands the result
+// to every monitor's copy of this module — see statusbarScope.updatesCount)
+// so multiple bar instances don't each spawn their own poll or fight over the
+// `qs ipc call updates ...` target. The module hides itself completely while
+// no updates are available; clicking it launches the ML4W update routine.
 Rectangle {
     id: updates
 
-    // Number of available updates (0 = nothing pending, module hidden).
+    // Number of available updates (0 = nothing pending, module hidden). Set
+    // by the StatusbarWindow instance that loads this module.
     property int count: 0
     // True when there is nothing to show. The right Repeater reads this to
     // collapse the layout slot, and rebuildNavItems skips collapsed modules.
@@ -89,47 +93,5 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: updates.activate()
-    }
-
-    // Parse the script's JSON output ({"text": "69", ...}); an empty line means
-    // zero updates and the script prints nothing.
-    function refresh(): void {
-        updatesProc.running = false
-        updatesProc.running = true
-    }
-
-    Process {
-        id: updatesProc
-        command: ["bash", "-c",
-            Quickshell.env("HOME") + "/.config/ml4w/scripts/ml4w-check-system-updates"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    let raw = this.text.trim()
-                    updates.count = raw ? parseInt(JSON.parse(raw).text) || 0 : 0
-                } catch (e) {
-                    updates.count = 0
-                }
-            }
-        }
-    }
-
-    // Re-check on the same 1800s interval as the Waybar module.
-    Timer {
-        interval: 1800 * 1000
-        running: true
-        repeat: true
-        onTriggered: updates.refresh()
-    }
-
-    // Let external scripts drive the module via `qs ipc call updates ...`.
-    // `reset` clears the count immediately (e.g. right after an update run,
-    // so the module hides itself without waiting for the next poll); `refresh`
-    // re-runs the check script on demand.
-    IpcHandler {
-        target: "updates"
-        function reset(): void { updates.count = 0 }
-        function refresh(): void { updates.refresh() }
     }
 }
