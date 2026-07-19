@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_DIR="$HOME/projects/ml4wdotfiles"
+GIT_DIR="$PROJECT_DIR/dotfiles/.config"
+CFG_DIR="$HOME/.config"
+
+cd "$PROJECT_DIR"
+git pull
+cd "$GIT_DIR"
+
+git ls-files -z | while IFS= read -r -d '' f; do
+    # Letzten Commit-Zeitpunkt für genau diese Datei ermitteln
+    ts=$(git log -1 --format="%ad" --date=unix -- "$f")
+    if [[ -n "$ts" ]]; then
+        touch -d "@$ts" "$f"
+    fi
+done
+
+rsync -av --update --backup --backup-dir="$HOME/.cache/dotfiles-sync/backup-$(date +%Y%m%d-%H%M%S)" "$GIT_DIR/" "$CFG_DIR/" 
+
+exit $?
