@@ -52,7 +52,9 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("wl-paste --watch cliphist store")
 
     -- OpenRGB
-    hl.exec_cmd("/usr/bin/openrgb --startminimized --profile 'Rot Blau.orp'")
+    --- hl.exec_cmd("/usr/bin/openrgb --startminimized --profile 'Rot Blau.orp'")
+    hl.exec_cmd("flatpak run org.openrgb.OpenRGB --startminimized --profile 'Default.orp'")
+    
 
     -- Start autostart cleanup
     hl.exec_cmd("~/.config/hypr/scripts/cleanup.sh")
