@@ -17,6 +17,32 @@ git ls-files -z | while IFS= read -r -d '' f; do
     fi
 done
 
-rsync -av --update --backup --backup-dir="$HOME/.cache/dotfiles-sync/backup-$(date +%Y%m%d-%H%M%S)" "$GIT_DIR/" "$CFG_DIR/" 
+BACKUP_DIR="$HOME/.cache/dotfiles-sync/backup-$(date +%Y%m%d-%H%M%S)"
+
+# matugen renders live theme colors into this one .qml file at runtime (see
+# matugen/config.toml, templates.quickshell_overview) — unlike every other
+# .qml file it is generated output, not static app code, so it must stay on
+# the --update path below instead of being force-overwritten with git's
+# checked-in snapshot.
+LIVE_GENERATED_QML="quickshell/overview/common/Appearance.colors.qml"
+
+# .qml files are pure code, never edited or written to live (unlike e.g.
+# ml4w/settings/statusbar.json, which the running shell persists toggle state
+# into). Force-overwrite them unconditionally rather than via --update: a
+# rebase can replay a commit with an author date that predates when the file
+# was last deployed (e.g. a feature branch merged after main was already
+# synced without it), which makes --update skip a real update forever because
+# the live file looks "newer" than the source despite being stale content.
+rsync -av --backup --backup-dir="$BACKUP_DIR" \
+    --exclude="$LIVE_GENERATED_QML" \
+    --include='*/' --include='*.qml' --exclude='*' \
+    "$GIT_DIR/" "$CFG_DIR/"
+
+# Everything else (settings JSON, matugen-generated files, scripts, etc.)
+# keeps --update so files the running shell/matugen write to at runtime
+# aren't clobbered with the shipped defaults.
+rsync -av --update --backup --backup-dir="$BACKUP_DIR" \
+    --include="$LIVE_GENERATED_QML" --exclude='*.qml' \
+    "$GIT_DIR/" "$CFG_DIR/"
 
 exit $?
