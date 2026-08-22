@@ -51,6 +51,9 @@ hl.on("hyprland.start", function ()
     -- Load cliphist history
     hl.exec_cmd("wl-paste --watch cliphist store")
 
+   -- Run kwallet init
+    hl.exec_cmd("/usr/lib/pam_kwallet_init")
+
     -- OpenRGB
     hl.exec_cmd("flatpak run org.openrgb.OpenRGB --startminimized --profile 'Default.orp'")
 
