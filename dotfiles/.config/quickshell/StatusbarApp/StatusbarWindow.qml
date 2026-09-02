@@ -38,7 +38,8 @@ Scope {
         "border": { "width": 2, "colorTop": "", "colorBottom": "" },
         "opacity":{ "collapsed": 0.6, "expanded": 0.8 },
         "clock":  { "format": "HH:mm", "dateFormat": "ddd, dd MMM" },
-        "workspaces": { "count": 5 }
+        "workspaces": { "count": 5 },
+        "systemtray": { "iconSize": 20, "colorize": true }
     })
 
     property var settings: defaultSettings
@@ -491,6 +492,8 @@ Scope {
             Component {
                 id: cSystemTray
                 SystemTrayModule {
+                    iconSize: root.settings.systemtray.iconSize
+                    colorize: root.settings.systemtray.colorize
                     // Rebuild keyboard navigation when the tray empties or repopulates
                     // (it collapses out of the layout when it has no items).
                     onCollapsedChanged: Qt.callLater(root.rebuildNavItems)

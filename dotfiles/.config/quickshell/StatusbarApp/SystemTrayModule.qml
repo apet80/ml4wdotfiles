@@ -1,12 +1,27 @@
 import Quickshell
 import Quickshell.Services.SystemTray
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
+import qs.CustomTheme
 
 // System tray (StatusNotifierItem hosts).
 RowLayout {
     id: tray
-    spacing: 10
+    spacing: 4
+
+    // Edge length of the icon drawn inside each 30px round hover target. Fed
+    // from statusbar.json ("systemtray": { "iconSize": ... }).
+    property int iconSize: 20
+
+    // Flatten every tray icon to a single flat glyph in the bar's accent color
+    // (background color while hovered), so the tray matches the bar's own
+    // modules. Several common tray clients — nm-applet, firewall-applet — only
+    // publish a dark monochrome symbol that is nearly invisible on the dark
+    // bar; this makes them read at a glance. Set "systemtray": { "colorize":
+    // false } in statusbar.json to render apps' real (multi-color) icons
+    // as-is instead.
+    property bool colorize: true
 
     // Collapse the slot when there are no tray items, so the right Repeater
     // hides this Loader and the RowLayout doesn't reserve spacing around an
@@ -25,32 +40,61 @@ RowLayout {
     Repeater {
         model: SystemTray.items
 
-        delegate: MouseArea {
+        delegate: Rectangle {
             id: trayItem
             required property var modelData
 
-            implicitWidth: 20
-            implicitHeight: 20
+            implicitWidth: 30
+            implicitHeight: 30
+            radius: 15
             Layout.alignment: Qt.AlignVCenter
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+            readonly property bool active: mouseArea.containsMouse
+
+            // Same accent-filled circle the other bar modules show on hover.
+            color: active ? Theme.primary : "transparent"
+            Behavior on color {
+                ColorAnimation { duration: 500; easing.type: Easing.OutQuint }
+            }
 
             Image {
                 anchors.centerIn: parent
                 source: trayItem.modelData.icon
-                width: 18
-                height: 18
-                sourceSize.width: 18
-                sourceSize.height: 18
+                width: tray.iconSize
+                height: tray.iconSize
+                sourceSize.width: tray.iconSize
+                sourceSize.height: tray.iconSize
                 fillMode: Image.PreserveAspectFit
+                layer.enabled: tray.colorize
+                layer.effect: MultiEffect {
+                    // Flatten the icon to a single flat accent-colored glyph.
+                    // brightness raises every non-transparent pixel toward white
+                    // first, so dark monochrome symbols (nm-applet,
+                    // firewall-applet) end up as bright as the solid ones rather
+                    // than a dim tinted shape; colorization then recolors the
+                    // whole thing to the bar's accent, following the icon's
+                    // alpha edges.
+                    brightness: 0.5
+                    colorization: 1.0
+                    colorizationColor: trayItem.active ? Theme.background : Theme.primary
+                    Behavior on colorizationColor {
+                        ColorAnimation { duration: 500; easing.type: Easing.OutQuint }
+                    }
+                }
             }
 
-            onClicked: (mouse) => {
-                if (mouse.button === Qt.LeftButton && !modelData.onlyMenu) {
-                    modelData.activate()
-                } else if (modelData.hasMenu) {
-                    trayMenu.open()
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: (mouse) => {
+                    if (mouse.button === Qt.LeftButton && !trayItem.modelData.onlyMenu) {
+                        trayItem.modelData.activate()
+                    } else if (trayItem.modelData.hasMenu) {
+                        trayMenu.open()
+                    }
                 }
             }
 

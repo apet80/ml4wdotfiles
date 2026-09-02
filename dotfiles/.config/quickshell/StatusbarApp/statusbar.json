@@ -5,6 +5,12 @@ bar.monitors controls which monitors get a bar:
   []                  - first monitor only (default)
   ["all"]              - every connected monitor
   ["DP-1", "HDMI-A-1"] - an explicit list of monitor names (see `hyprctl monitors`)
+
+systemtray.colorize (default true) flattens every tray icon to a flat glyph in
+the bar's accent color, so faint monochrome symbols like nm-applet /
+firewall-applet read as clearly as the bar's own icons. Set it to false to draw
+apps' real icon colors instead.
+systemtray.iconSize is the icon edge length in px.
 */
 {
     "bar": {
@@ -42,5 +48,9 @@ bar.monitors controls which monitors get a bar:
     },
     "workspaces": {
         "count": 5
+    },
+    "systemtray": {
+        "iconSize": 20,
+        "colorize": true
     }
 }
